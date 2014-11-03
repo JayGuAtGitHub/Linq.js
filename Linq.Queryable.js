@@ -31,6 +31,14 @@ _QueryableObject.prototype.toArray = function () {
     return _result;
 }
 
+_QueryableObject.prototype.toObject = function () {
+    var _result = {};
+    for (var i = 0 ; i < Object.keys(this).length ; i++) {
+        _result[Object.keys(this)[i]] = (this[Object.keys(this)[i]]);
+    }
+    return _result;
+}
+
 //Linq functions
 
 _QueryableObject.prototype.Aggregate = function (arg1, arg2, arg3) {
