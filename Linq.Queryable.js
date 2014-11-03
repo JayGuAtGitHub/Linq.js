@@ -7,10 +7,10 @@ function _QueryableObject(_obj) {
     if (typeof(_obj) === "object") {
         for (var i = 0 ; i < Object.keys(_obj).length ; i++) {
             if (typeof (_obj[Object.keys(_obj)[i]]) === "object") {
-                this[i] = new _QueryableObject(_obj[Object.keys(_obj)[i]]);
+                this[Object.keys(_obj)[i]] = new _QueryableObject(_obj[Object.keys(_obj)[i]]);
             }
             else {
-                this[i] = _obj[Object.keys(_obj)[i]];
+                this[Object.keys(_obj)[i]] = _obj[Object.keys(_obj)[i]];
             }
         }
         return this;
@@ -26,7 +26,7 @@ _QueryableObject.prototype = {
 _QueryableObject.prototype.toArray = function () {
     var _result = [];
     for (var i = 0 ; i < Object.keys(this).length ; i++) {
-        _result.push(Object.keys(this)[i]);
+        _result.push(this[Object.keys(this)[i]]);
     }
     return _result;
 }
