@@ -163,27 +163,6 @@ _QueryableObject.prototype.DefaultIfEmpty = function (defaultValue) {
     return this;
 }
 
-_QueryableObject.prototype.Intersect = function (_second, comparer) {
-    if (comparer) {
-        var _firstArray = this.Distinct().toArray(), _secondArray = this.Distinct(), _result;
-        _firstArray.forEach(function (_fistElement) {
-            if (_secondArray.Contain(_fistElement,comparer)) {
-                _result.push(_fistElement);
-            }
-        });
-        return new _QueryableObject(_result);
-    }
-    if (_second) {
-        var _firstArray = this.Distinct().toArray(), _secondArray = this.Distinct(),_result;
-        _firstArray.forEach(function (_fistElement) {
-            if (_secondArray.Contain(_fistElement)) {
-                _result.push(_fistElement);
-            }
-        });
-        return new _QueryableObject(_result);
-    }
-}
-
 _QueryableObject.prototype.ElementAt = function (index) {
     return this[Object.keys(this)[index]];
 }
@@ -215,7 +194,42 @@ _QueryableObject.prototype.Except = function (_second,comparer) {
 }
 
 _QueryableObject.prototype.First = function (predicate) {
+    if (predicate) {
+        return this.Where(predicate).ElementAt(0);
+    }
+    return this.ElementAt(0);
+}
 
+_QueryableObject.prototype.FirstOrDefault = function (predicate) {
+    if (predicate) {
+        return this.Where(predicate).ElementAtOrDefault(0);
+    }
+    return this.ElementAtOrDefault(0);
+}
+
+_QueryableObject.prototype.GroupBy = function () {
+
+}
+
+_QueryableObject.prototype.Intersect = function (_second, comparer) {
+    if (comparer) {
+        var _firstArray = this.Distinct().toArray(), _secondArray = this.Distinct(), _result;
+        _firstArray.forEach(function (_fistElement) {
+            if (_secondArray.Contain(_fistElement, comparer)) {
+                _result.push(_fistElement);
+            }
+        });
+        return new _QueryableObject(_result);
+    }
+    if (_second) {
+        var _firstArray = this.Distinct().toArray(), _secondArray = this.Distinct(), _result;
+        _firstArray.forEach(function (_fistElement) {
+            if (_secondArray.Contain(_fistElement)) {
+                _result.push(_fistElement);
+            }
+        });
+        return new _QueryableObject(_result);
+    }
 }
 
 _QueryableObject.prototype.Where = function (arg1) {
