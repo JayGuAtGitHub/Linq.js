@@ -4,7 +4,7 @@
 
 function _QueryableObject(_obj) {
 
-    if ((!(_obj === null)) || (!(_obj === undefined)) || typeof (_obj) === "object") {
+    if ((!(_obj === null)) && (!(_obj === undefined)) && typeof (_obj) === "object") {
         for (var i = 0 ; i < Object.keys(_obj).length ; i++) {
             if (typeof (_obj[Object.keys(_obj)[i]]) === "object") {
                 this[Object.keys(_obj)[i]] = new _QueryableObject(_obj[Object.keys(_obj)[i]]);
