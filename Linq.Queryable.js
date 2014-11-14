@@ -39,6 +39,10 @@ _QueryableObject.prototype.toObject = function () {
     return _result;
 }
 
+_QueryableObject.prototype.keyAt = function (index) {
+    return Object.keys(this)[index];
+}
+
 //Linq functions
 
 _QueryableObject.prototype.Aggregate = function (arg1, arg2, arg3) {
@@ -231,6 +235,191 @@ _QueryableObject.prototype.Intersect = function (_second, comparer) {
         return new _QueryableObject(_result);
     }
 }
+
+_QueryableObject.prototype.Last = function (predicate) {
+    if (predicate) {
+        return this.Where(predicate).Last();
+    }
+    return this.ElementAt(this.Count() - 1);
+}
+
+_QueryableObject.prototype.LastOrDefault = function (predicate) {
+    if (predicate) {
+        return this.Where(predicate).Last();
+    }
+    return this.ElementAtOrDefault(this.Count() - 1);
+}
+
+_QueryableObject.prototype.Max = function (selector) {
+    var _maxResult;
+    if (selector) {
+        _maxResult = this.First();
+        var _maxCompare = selector(this.First());
+        for (var i = 0 ; i < this.Count() ; i++) {
+            if (_maxCompare < selector(this.ElementAt(i))) {
+                _maxCompare = selector(this.ElementAt(i));
+                _maxResult = this.ElementAt(i);
+            }
+        }
+    }
+    else {
+        _maxResult = this.First();
+        for (var i = 0 ; i < this.Count() ; i++) {
+            if (_maxResult < this.ElementAt(i)) {
+                _maxResult = this.ElementAt(i);
+            }
+        }
+    }
+    return _maxResult;
+}
+
+_QueryableObject.prototype.Min = function (selector) {
+    var _minResult;
+    if (selector) {
+        _minResult = this.First();
+        var _minCompare = selector(this.First());
+        for (var i = 0 ; i < this.Count() ; i++) {
+            if (_minCompare > selector(this.ElementAt(i))) {
+                _minCompare = selector(this.ElementAt(i));
+                _minResult = this.ElementAt(i);
+            }
+        }
+    }
+    else {
+        _minResult = this.First();
+        for (var i = 0 ; i < this.Count() ; i++) {
+            if (_minResult > this.ElementAt(i)) {
+                _minResult = this.ElementAt(i);
+            }
+        }
+    }
+    return _minResult;
+}
+
+_QueryableObject.prototype.Reverse = function () {
+    var _result = {}
+    for (var i = this.Count() - 1; i >= 0; i++) {
+        _result[Object.keys(this)[i]] = this.ElementAt(i);
+    }
+    return new _QueryableObject(_result);
+}
+
+_QueryableObject.prototype.Select = function (selector) {
+    var _result = {};
+    for (var i = 0 ; i < this.Count() ; i++) {
+        _result[this.keyAt(i)] = selector(this.ElementAt(i), i);
+    }
+    return new _QueryableObject(_result);
+}
+
+_QueryableObject.prototype.SelectMany = function (selector) {
+    var _result = [];
+    for (var i = 0 ; i < this.Count() ; i++) {
+        selector(this.ElementAt(i), i).forEach(function (element) {
+            _result.push(element);
+        });
+    }
+    return new _QueryableObject(_result);
+}
+
+_QueryableObject.prototype.SequenceEqual = function (comparedObj, comparer) {
+    if (this.Count() !== comparedObj.Count()) {
+        return false;
+    }
+    if (comparer) {
+        for (var i = 0, length = this.Count() ; i < length; i++) {
+            if (comparer(this.ElementAt(i), comparedObj.ElementAt(i)) === false) {
+                return false;
+            }
+        }
+        return true;
+    }
+    for (var i = 0, length = this.Count() ; i < length; i++) {
+        if (this.ElementAt(i) != comparedObj.ElementAt(i)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+_QueryableObject.prototype.Single = function (predicate) {
+    if (predicate) {
+        return this.Where(predicate).Single();
+    }
+    if (this.Count() !== 1) {
+        throw "Not only 1 exists."
+    }
+    return this.First();
+}
+
+_QueryableObject.prototype.SingleOrDefault = function (predicate) {
+    if (predicate) {
+        return this.Where(predicate).SingleOrDefault();
+    }
+    if (this.Count() > 0) {
+        throw "More than 1 exists."
+    }
+    return this.FirstOrDefault();
+}
+
+_QueryableObject.prototype.Skip = function (count) {
+    if (count >= this.Count()) {
+        return null
+    }
+    var _result = {}
+    for (var i = count, length = this.Count() ; i < length; i++) {
+        _result[this.keyAt(i)] = this.ElementAt(i)
+    }
+    return new _QueryableObject(_result);
+}
+
+_QueryableObject.prototype.SkipWhile = function (predicate) {
+    var _result = {}
+    for (var i = 0, length = this.Count() ; i < length; i++) {
+        if (predicate(this.ElementAt(i), i) !== true) {
+            _result[this.keyAt(i)] = this.ElementAt(i);
+        }
+    }
+    return new _QueryableObject(_result);
+}
+
+_QueryableObject.prototype.Sum = function (selector) {
+    if (this.Count() === 0) {
+        return 0;
+    }
+    if (selector) {
+        var _sum = selector(this.First())
+        for (var i = 1, length = this.Count() ; i < length; i++) {
+            _sum = _sum + selector(this.ElementAt(i));
+        }
+        return _sum;
+    }
+    var _sum = this.First()
+    for (var i = 1, length = this.Count() ; i < length; i++) {
+        _sum = _sum + this.ElementAt(i);
+    }
+    return _sum;
+}
+
+_QueryableObject.prototype.Take = function (count) {
+    var _result = {};
+    for (var i = 0, length = count > this.Count() ? this.Count() : count; i < length; i++) {
+        _result[this.keyAt(i)] = this.ElementAt(i);
+    }
+    return new _QueryableObject(_result);
+}
+
+_QueryableObject.prototype.TakeWhile = function (predicate) {
+    var _result = {}
+    for (var i = 0, length = this.Count() ; i < length; i++) {
+        if (predicate(this.ElementAt(i), i) === true) {
+            _result[this.keyAt(i)] = this.ElementAt(i);
+        }
+    }
+    return new _QueryableObject(_result);
+}
+
+
 
 _QueryableObject.prototype.Where = function (arg1) {
     if (arg1) {
