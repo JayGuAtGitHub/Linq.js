@@ -39,6 +39,10 @@ _QueryableObject.prototype.toObject = function () {
     return _result;
 }
 
+_QueryableObject.prototype.clone = function () {
+    return _QueryableObject(this);
+}
+
 //Linq functions
 
 _QueryableObject.prototype.Aggregate = function (arg1, arg2, arg3) {
@@ -207,8 +211,57 @@ _QueryableObject.prototype.FirstOrDefault = function (predicate) {
     return this.ElementAtOrDefault(0);
 }
 
-_QueryableObject.prototype.GroupBy = function () {
+_QueryableObject.prototype.GroupBy = function (keys, comparer) {
+    function initKeysCursor(obj) {
+        var _keysCursorResult = { Keys: {}, Values: [] };
+        keys.forEach(function (element) {
+            _keysCursorResult.Keys[element] = obj[element];
+        });
+        return _keysCursorResult;
+    }
+    var _result = [], orderedThis = window.Linq.QueryableObject(this).OrderBy(keys), _keysCursor = initKeysCursor(orderedThis.First());
 
+    if (comparer) {
+        orderedThis.toArray().forEach(function (element, index) {
+            if ((function () {
+                for (var i in _keysCursor.Keys) {
+                    if (comparer(element[i], _keysCursor.Keys[i])) {
+                        return false;
+            }
+            }
+                return true;
+            })()) {
+                _keysCursor.Values.push(element);
+            }
+            else {
+                _result.push(_keysCursor);
+                _keysCursor = initKeysCursor(element);
+                _keysCursor.Values.push(element);
+            }
+        });
+    }
+    else {
+        orderedThis.toArray().forEach(function (element, index) {
+            if ((function () {
+                for (var i in _keysCursor.Keys) {
+                    if (element[i] !== _keysCursor.Keys[i]) {
+                        return false;
+            }
+            }
+                return true;
+            })()) {
+                _keysCursor.Values.push(element);
+            }
+            else {
+                _result.push(_keysCursor);
+                _keysCursor = initKeysCursor(element);
+                _keysCursor.Values.push(element);
+            }
+        });
+    }
+    
+    _result.push(_keysCursor);
+    return _result;
 }
 
 _QueryableObject.prototype.Intersect = function (_second, comparer) {
@@ -230,6 +283,52 @@ _QueryableObject.prototype.Intersect = function (_second, comparer) {
         });
         return new _QueryableObject(_result);
     }
+}
+
+_QueryableObject.prototype.OrderBy = function (keySelectors, comparer) {
+    var _result = window.Linq.QueryableObject(this).toArray();
+    if (comparer) {
+        _result.sort(function (_this, _next) {
+            for (var i = 0 ; i < keySelectors.length ; i++) {
+                if (comparer(_this[keySelectors[i]], _next[keySelectors[i]]) > 0) {
+                    return true;
+                }
+            }
+        });
+    }
+    else {
+        _result.sort(function (_this, _next) {
+            for (var i = 0 ; i < keySelectors.length ; i++) {
+                if (_this[keySelectors[i]]> _next[keySelectors[i]]) {
+                    return true;
+                }
+            }
+        });
+    }
+    return new _QueryableObject(_result);
+}
+
+_QueryableObject.prototype.OrderByDescending = function (keySelectors, comparer) {
+    var _result = window.Linq.QueryableObject(this).toArray();
+    if (comparer) {
+        _result.sort(function (_this, _next) {
+            for (var i = 0 ; i < keySelectors.length ; i++) {
+                if (comparer(_this[keySelectors[i]], _next[keySelectors[i]]) < 0) {
+                    return true;
+                }
+            }
+        });
+    }
+    else {
+        _result.sort(function (_this, _next) {
+            for (var i = 0 ; i < keySelectors.length ; i++) {
+                if (_this[keySelectors[i]] < _next[keySelectors[i]]) {
+                    return true;
+                }
+            }
+        });
+    }
+    return new _QueryableObject(_result);
 }
 
 _QueryableObject.prototype.Where = function (arg1) {
