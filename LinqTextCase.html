@@ -8,11 +8,13 @@
     <script type="text/javascript" src="Linq.Queryable.js"></script>
     <script type="text/javascript" src="Linq.Extension.js"></script>
     <script>
-        var obj = {
-            x1: 1,
-            y1: 2
-        };
-        var x = window.Linq.QueryableObject(obj);
+        left = window.Linq.QueryableObject([{ id: 1, name: "left name" }]);
+        right = window.Linq.QueryableObject([{ id: 1, name: "right name1" }, { id: 1, name: "right name2" }]);
+        var x = left.GroupJoin(right, function (l) { return l.id; }, function (r) { return r.id; }, function (l, rArray) {
+            var _result = { lName: l.name, rNames: [] }
+            rArray.toArray().forEach(function (element) { _result.rNames.push(element.name); });
+            return _result;
+        });
     </script>
 </head>
 <body>

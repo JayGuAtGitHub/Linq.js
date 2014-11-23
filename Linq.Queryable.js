@@ -269,6 +269,33 @@ _QueryableObject.prototype.GroupBy = function (keys, comparer) {
     return _result;
 }
 
+_QueryableObject.prototype.GroupJoin = function (inner, outerKeySelector, innerKeySelector, resultSelector, comparer) {
+    var _result = [];
+    if (comparer) {
+        for (var i = 0, iLength = this.Count() ; i < iLength; i++) {
+            var _eachResult = [];
+            for (var j = 0, jLength = inner.Count() ; j < jLength; j++) {
+                if (comparer(outerKeySelector(this.ElementAt(i)), innerKeySelector(inner.ElementAt(j)))) {
+                    _eachResult.push(inner.ElementAt(j));
+                }
+            }
+            _result.push(resultSelector(this.ElementAt(i), new _QueryableObject(_eachResult)));
+        }
+    }
+    else {
+        for (var i = 0, iLength = this.Count() ; i < iLength; i++) {
+            var _eachResult = [];
+            for (var j = 0, jLength = inner.Count() ; j < jLength; j++) {
+                if (outerKeySelector(this.ElementAt(i)) === innerKeySelector(inner.ElementAt(j))) {
+                    _eachResult.push(inner.ElementAt(j));
+                }
+            }
+            _result.push(resultSelector(this.ElementAt(i), new _QueryableObject(_eachResult)));
+        }
+    }
+    return new _QueryableObject(_result);
+}
+
 _QueryableObject.prototype.Intersect = function (source2, comparer) {
     var _source2 = source2.Distinct(), _result = [];
     if (comparer) {
@@ -282,6 +309,29 @@ _QueryableObject.prototype.Intersect = function (source2, comparer) {
         for (var i = 0, length = _source2.Count() ; i < length; i++) {
             if (this.Contain(_source2.ElementAt(i))) {
                 _result.push(_source2.ElementAt(i));
+            }
+        }
+    }
+    return new _QueryableObject(_result);
+}
+
+_QueryableObject.prototype.Join = function (inner, outerKeySelector, innerKeySelector, resultSelector, comparer) {
+    var _result = [];
+    if (comparer) {
+        for (var i = 0, iLength = this.Count() ; i < iLength; i++) {
+            for (var j = 0, jLength = inner.Count() ; j < jLength; j++) {
+                if (comparer(outerKeySelector(this.ElementAt(i)), innerKeySelector(inner.ElementAt(j)))) {
+                    _result.push(resultSelector(this.ElementAt(i), inner.ElementAt(j)));
+                }
+            }
+        }
+    }
+    else {
+        for (var i = 0, iLength = this.Count() ; i < iLength; i++) {
+            for (var j = 0, jLength = inner.Count() ; j < jLength; j++) {
+                if (outerKeySelector(this.ElementAt(i)) === innerKeySelector(inner.ElementAt(j))) {
+                    _result.push(resultSelector(this.ElementAt(i), inner.ElementAt(j)));
+                }
             }
         }
     }
