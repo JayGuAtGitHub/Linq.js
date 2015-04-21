@@ -39,6 +39,12 @@ _QueryableObject.prototype.toObject = function () {
     return _result;
 }
 
+_QueryableObject.prototype.map = function(call) {
+    return this.toArray().map(function(element) {
+        call(element);
+    });
+}
+
 _QueryableObject.prototype.push = function (value) {
     this[this.Count() + 1] = new _QueryableObject(value);
 }
@@ -200,6 +206,30 @@ _QueryableObject.prototype.Except = function (_second, comparer) {
         });
     }
     return _result.length ? null : new _QueryableObject(_result);
+}
+
+_QueryableObject.prototype.ExpandBy = function (groupedKey) {
+
+    var returnArray = [];
+    for (var i = 0, len = this.Count() ; i < len; i++) {
+        var groupByKeys = [],thisObj = this[i];
+        Object.keys(thisObj).map(function (key) {
+            if (key != groupedKey) {
+                groupByKeys.push(key)
+            }
+        })
+        thisObj[groupedKey].map(function (groupedObj) {
+            var _obj = {};
+            groupByKeys.map(function(key) {
+                _obj[key] = thisObj[key];
+            });
+            Object.keys(groupedObj).map(function(innerGroupedKey) {
+                _obj[innerGroupedKey] = groupedObj[innerGroupedKey];
+            });
+            returnArray.push(_obj);
+        })
+    }
+    return returnArray;
 }
 
 _QueryableObject.prototype.First = function (predicate) {
